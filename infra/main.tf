@@ -23,24 +23,35 @@ resource "aws_s3_object" "zipped_lambda" {
   source = data.archive_file.local_zipped_lambda.output_path
 }
 
+resource "aws_dynamodb_table" "state" {
+  name         = "${var.name}-state"
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key     = "id"
+
+  attribute {
+    name = "id"
+    type = "S"
+  }
+}
+
 resource "aws_iam_role" "service" {
   name = var.name
 
-  assume_role_policy = <<EOF
-{
-  "Version": "2012-10-17",
-  "Statement": [
+  assume_role_policy = jsonencode(
     {
-      "Action": "sts:AssumeRole",
-      "Principal": {
-        "Service": "lambda.amazonaws.com"
-      },
-      "Effect": "Allow",
-      "Sid": ""
+      Version = "2012-10-17",
+      Statement = [
+        {
+          Action = "sts:AssumeRole",
+          Principal = {
+            Service = "lambda.amazonaws.com"
+          },
+          Effect = "Allow",
+          Sid    = ""
+        }
+      ]
     }
-  ]
-}
-EOF
+  )
 }
 
 resource "aws_iam_role_policy_attachment" "service" {
@@ -115,13 +126,3 @@ resource "aws_lambda_permission" "lambda_cloudwatch" {
   source_arn    = aws_cloudwatch_event_rule.lambda.arn
 }
 
-resource "aws_dynamodb_table" "state" {
-  name         = "${var.name}-state"
-  billing_mode = "PAY_PER_REQUEST"
-  hash_key     = "id"
-
-  attribute {
-    name = "id"
-    type = "S"
-  }
-}
