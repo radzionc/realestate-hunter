@@ -6,7 +6,7 @@ import { StateProvider } from '../StateProvider'
 const msInDay = 86400000
 
 const sourceName = 'myhome.ge'
-const realEstateSearchPage = `https://www.myhome.ge/en/s/Apartment-for-sale-Tbilisi?Keyword=Tbilisi&AdTypeID=1&PrTypeID=1&mapC=41.70931%2C44.78487&mapZ=12&mapOp=1&EnableMap=0&regions=687586034.689678147.689701920&districts=2022621279.906139527.1650325628.2185664.5965823289.798496409&cities=1996871&GID=1996871&FCurrencyID=1&FPriceTo=110000&AreaSizeFrom=70&FloorNums=notlast.notfirst&BedRoomNums=2.3&action_map=on&RenovationID=1.5.7`
+const realEstateSearchPage = `https://www.myhome.ge/en/s/Apartment-for-sale-Tbilisi?Keyword=Tbilisi&AdTypeID=1&PrTypeID=1&mapC=41.70931%2C44.78487&mapZ=12&mapOp=1&EnableMap=0&regions=687586034.689678147.689701920.687611312.688350922.687602533&districts=26445359.2022621279.62672532.1650325628.2185664.5965823289.798496409.5469869&cities=1996871&GID=1996871&FCurrencyID=1&FPriceTo=110000&AreaSizeFrom=50&FloorNums=notlast.notfirst&BedRoomNums=2.3&action_map=on&RenovationID=1`
 
 const getUnitsFromPage = (body: string) => {
   const $ = load(body)
