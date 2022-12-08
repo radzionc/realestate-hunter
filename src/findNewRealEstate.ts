@@ -4,5 +4,7 @@ import { tellAboutUnits } from './tellAboutUnits'
 export const findNewRealEstate = async () => {
   const units = await getNewRealEstate()
 
-  await tellAboutUnits(units)
+  if (units.length) {
+    await tellAboutUnits(units)
+  }
 }

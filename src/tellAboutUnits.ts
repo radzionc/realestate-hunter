@@ -7,7 +7,11 @@ export const tellAboutUnits = async (units: Unit[]) => {
   const telegramChatId = assertEnvVar('TELEGRAM_BOT_CHAT_ID')
 
   const bot = new TelegramBot(telegramBotToken)
-  await Promise.all(
-    units.map(({ url }) => bot.sendMessage(telegramChatId, url))
-  )
+  const message = units
+    .map(
+      (unit, index) => `${index + 1}. ${unit.squireMeterPrice} m2 ${unit.url}`
+    )
+    .join('\n')
+
+  await bot.sendMessage(telegramChatId, message)
 }
