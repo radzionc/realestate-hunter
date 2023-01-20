@@ -16,18 +16,23 @@ function makePortions<T>(arr: T[], portionSize: number) {
   return portions
 }
 
+const portionSize = 10
+
 export const tellAboutUnits = async (units: Unit[]) => {
   const telegramBotToken = assertEnvVar('TELEGRAM_BOT_TOKEN')
   const telegramChatId = assertEnvVar('TELEGRAM_BOT_CHAT_ID')
 
   const bot = new TelegramBot(telegramBotToken)
 
-  const portions = makePortions(units, 10)
+  const portions = makePortions(units, portionSize)
 
-  for (const portion of portions) {
+  for (const [portionIndex, portion] of portions.entries()) {
     const message = portion
       .map(
-        (unit, index) => `${index + 1}. ${unit.squireMeterPrice} m2 ${unit.url}`
+        (unit, index) =>
+          `${portionIndex * portionSize + index + 1}. ${
+            unit.squireMeterPrice
+          } m2 ${unit.url}`
       )
       .join('\n')
 
