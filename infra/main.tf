@@ -109,7 +109,7 @@ resource "aws_iam_policy" "service" {
 
 resource "aws_cloudwatch_event_rule" "lambda" {
   name                = var.name
-  schedule_expression = "rate(1 hour)"
+  schedule_expression = "rate(30 minutes)"
 }
 
 resource "aws_cloudwatch_event_target" "lambda" {

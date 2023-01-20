@@ -15,6 +15,8 @@ const streetsToIgnore = [
   'University',
   'Beritashvili',
   'Politkovskaya',
+  'Nutsubidze',
+  'Mindeli',
 ]
 
 const getUnitsFromPage = (body: string) => {
