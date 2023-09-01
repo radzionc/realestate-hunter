@@ -6,18 +6,9 @@ import { StateProvider } from '../StateProvider'
 const msInDay = 86400000
 
 const sourceName = 'myhome.ge'
-const realEstateSearchPage = `https://www.myhome.ge/en/s/Newly-finished-apartment-for-sale-Tbilisi?Keyword=Tbilisi&AdTypeID=1&PrTypeID=1&mapC=41.73188365%2C44.8368762993663&mapOp=0&EnableMap=0&regions=687586034.689678147.689701920.688350922.687602533.687618311&districts=2022621279.62672532.1650325628.2185664.5965823289.798496409.5469869.164033350&cities=1996871&GID=1996871&EstateTypeID=1&FCurrencyID=1&FPriceTo=126000&AreaSizeFrom=60&FloorNums=notlast.notfirst`
+const realEstateSearchPage = `https://www.myhome.ge/en/s/Newly-finished-apartment-for-sale-Batumi?Keyword=Batumi&AdTypeID=1&PrTypeID=1&mapC=41.6509502%2C41.6360085&mapOp=0&EnableMap=0&districts=776460995.776458944.776463102.776465448&cities=8742159&GID=8742159&EstateTypeID=1&FCurrencyID=1&FPriceTo=118000&AreaSizeFrom=60&FloorNums=notlast.notfirst`
 
-const streetsToIgnore = [
-  'Lortqipanidze',
-  'Bochorishvili',
-  'Kavtaradze',
-  'University',
-  'Beritashvili',
-  'Politkovskaya',
-  'Nutsubidze',
-  'Mindeli',
-]
+const streetsToIgnore: string[] = []
 
 const getUnitsFromPage = (body: string) => {
   const $ = load(body)

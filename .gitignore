@@ -68,3 +68,5 @@ set_env_vars.sh
 lambda.zip
 dist
 output
+
+.yarn
