@@ -2,16 +2,31 @@ import fetch from 'node-fetch'
 import { load } from 'cheerio'
 import { Unit } from '../Unit'
 import { StateProvider } from '../StateProvider'
+import { MyHomeGeSearch } from './MyHomeGeSearch'
 
 const msInDay = 86400000
 
-export const sourceName = 'myhome.ge'
-// const realEstateSearchPage = `https://www.myhome.ge/en/s/Newly-finished-apartment-for-sale-Batumi?Keyword=Batumi&AdTypeID=1&PrTypeID=1&mapC=41.6509502%2C41.6360085&mapOp=0&EnableMap=0&districts=776460995.776458944.776463102.776465448&cities=8742159&GID=8742159&EstateTypeID=1&FCurrencyID=1&FPriceTo=156000&AreaSizeFrom=62&FloorTo=13&FloorNums=notlast.notfirst`
-// const realEstateSearchPage = `https://www.myhome.ge/ka/s/iyideba-bina?Keyword=%E1%83%91%E1%83%90%E1%83%97%E1%83%A3%E1%83%9B%E1%83%98&AdTypeID=1&PrTypeID=1&regions=7.8.11.13&fullregions=7.8.11.13&districts=71.72.75.76&cities=15&streets=Array&FCurrencyID=1&FPriceTo=158000&AreaSizeFrom=62&FloorTo=15&FloorNums=notlast.notfirst`
-const realEstateSearchPage = `https://www.myhome.ge/en/s/Newly-finished-apartment-for-sale?Keyword=%E1%83%91%E1%83%90%E1%83%97%E1%83%A3%E1%83%9B%E1%83%98&AdTypeID=1&PrTypeID=1&regions=7.8.11.13&fullregions=7.8.11.13&districts=71.72.75.76&cities=15&streets=Array&EstateTypeID=1&FCurrencyID=1&FPriceTo=158000&AreaSizeFrom=62&FloorTo=15&FloorNums=notlast.notfirst`
-const streetsToIgnore: string[] = ['Chavchavadze']
+const searches: MyHomeGeSearch[] = [
+  {
+    url: `https://www.myhome.ge/en/s/Newly-finished-apartment-for-sale?Keyword=%E1%83%91%E1%83%90%E1%83%97%E1%83%A3%E1%83%9B%E1%83%98&AdTypeID=1&PrTypeID=1&regions=7.8.11.13&fullregions=7.8.11.13&districts=71.72.75.76&cities=15&EstateTypeID=1&FCurrencyID=1&FPriceTo=158000&AreaSizeFrom=62&FloorTo=15&FloorNums=notlast.notfirst&BedRoomNums=2.3`,
+    ignoreStreets: ['chavchavadze', 'tbel-abuseri'],
+    name: 'Batumi apartment',
+  },
+  {
+    url: 'https://www.myhome.ge/en/s/House-for-Sale?Keyword=%E1%83%91%E1%83%90%E1%83%97%E1%83%A3%E1%83%9B%E1%83%98&AdTypeID=1&PrTypeID=2&cities=15&EstateTypeID=17&FCurrencyID=1&FPriceTo=200000',
+    ignoreStreets: [],
+    name: 'Batumi house',
+  },
+  {
+    url: 'https://www.myhome.ge/ka/s/iyideba-saxli?Keyword=%E1%83%A5%E1%83%9D%E1%83%91%E1%83%A3%E1%83%9A%E1%83%94%E1%83%97%E1%83%98&AdTypeID=1&PrTypeID=2&cities=94&EstateTypeID=17&FCurrencyID=1&FPriceTo=200000',
+    ignoreStreets: [],
+    name: 'Kobuleti house',
+  },
+]
 
-const getUnitsFromPage = (body: string) => {
+export const sourceName = 'myhome.ge'
+
+const getUnitsFromPage = (search: MyHomeGeSearch, body: string) => {
   const $ = load(body)
 
   const year = new Date().getFullYear()
@@ -37,27 +52,38 @@ const getUnitsFromPage = (body: string) => {
     const url = $card('a:first').attr('href')
     if (!url) return
 
-    const price = $card('.sq-price-usd').text()
+    const squireMeterPrice = Number($card('.sq-price-usd').text())
+    const price = Number($card('.item-price-usd').text().replace(',', ''))
+    const imageUrl = $card('.card-img').attr('src')
 
-    units.push({
+    const unit: Unit = {
+      name: search.name,
       url,
       id,
       createdAt: new Date(rawDateWithYear).getTime(),
-      squireMeterPrice: Number(price),
-    })
+      squireMeterPrice,
+      price,
+      imageUrl,
+    }
+
+    units.push(unit)
   })
 
   return units
 }
 
-const getUnits = async (postedAfter: number) => {
+const getUnits = async (search: MyHomeGeSearch, postedAfter: number) => {
   const recursive = async (units: Unit[], page: number): Promise<Unit[]> => {
-    const response = await fetch(`${realEstateSearchPage}&Page=${page}`)
+    const response = await fetch(`${search.url}&Page=${page}`)
     const body = await response.text()
 
-    const newUnits = getUnitsFromPage(body).filter(
-      (unit) => unit.createdAt > postedAfter
-    )
+    const newUnits = getUnitsFromPage(search, body)
+      .filter((unit) => unit.createdAt > postedAfter)
+      .filter((unit) =>
+        search.ignoreStreets.every(
+          (street) => !unit.url.toLowerCase().includes(street)
+        )
+      )
 
     if (newUnits.length < 1) return units
 
@@ -74,16 +100,18 @@ export const getNewRealEstate = async (): Promise<Unit[]> => {
   const searchForUnitsPostedAfter =
     state.lastVisitAt || Date.now() - msInDay * 2
 
-  const units = (await getUnits(searchForUnitsPostedAfter))
-    .filter((a) => !state.shown.includes(a.id))
-    .filter((unit) =>
-      streetsToIgnore.every((street) => !unit.url.includes(street))
+  const units = (
+    await Promise.all(
+      searches.map((search) => getUnits(search, searchForUnitsPostedAfter))
     )
+  ).flat()
+
+  const newUnits = units.filter((a) => !state.shown.includes(a.id))
 
   await stateProvider.update({
     lastVisitAt: Date.now(),
-    shown: [...state.shown, ...units.map((unit) => unit.id)],
+    shown: [...state.shown, ...newUnits.map((unit) => unit.id)],
   })
 
-  return units.sort((a, b) => a.squireMeterPrice - b.squireMeterPrice)
+  return newUnits
 }
