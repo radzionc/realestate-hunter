@@ -22,6 +22,11 @@ const searches: MyHomeGeSearch[] = [
     ignoreStreets: [],
     name: 'Kobuleti house',
   },
+  {
+    url: 'https://www.myhome.ge/ka/s/iyideba-axali-ashenebuli-bina?Keyword=%E1%83%A5%E1%83%9D%E1%83%91%E1%83%A3%E1%83%9A%E1%83%94%E1%83%97%E1%83%98&AdTypeID=1&PrTypeID=1&cities=94&EstateTypeID=1&FCurrencyID=1&FPriceTo=158000&AreaSizeFrom=62&FloorTo=15&FloorNums=notlast.notfirst&BedRoomNums=2.3',
+    ignoreStreets: [],
+    name: 'Kobuleti apartment',
+  },
 ]
 
 export const sourceName = 'myhome.ge'
