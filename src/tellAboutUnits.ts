@@ -11,13 +11,17 @@ export const tellAboutUnits = async (units: Unit[]) => {
   await Promise.all(
     units.map(async (unit) => {
       const message = [
-        `*${unit.name}*`,
+        `*${unit.name}*\n`,
         `📏 *m2:* ${unit.squireMeterPrice.toLocaleString()}$`,
         `💰 *Price:* ${unit.price.toLocaleString()}$`,
+        `[View more](${unit.url})`,
       ].join('\n')
 
       await bot.sendMessage(telegramChatId, message, {
         parse_mode: 'Markdown',
+        reply_markup: {
+          inline_keyboard: [[{ text: 'View more', url: unit.url }]],
+        },
       })
 
       if (unit.imageUrl) {

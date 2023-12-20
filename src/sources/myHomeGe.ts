@@ -54,7 +54,8 @@ const getUnitsFromPage = (search: MyHomeGeSearch, body: string) => {
 
     const squireMeterPrice = Number($card('.sq-price-usd').text())
     const price = Number($card('.item-price-usd').text().replace(',', ''))
-    const imageUrl = $card('.card-img').attr('src')
+
+    const imageUrl = $card('.swiper-lazy.card-img').attr('data-src')
 
     const unit: Unit = {
       name: search.name,
@@ -65,6 +66,8 @@ const getUnitsFromPage = (search: MyHomeGeSearch, body: string) => {
       price,
       imageUrl,
     }
+
+    console.log(unit)
 
     units.push(unit)
   })
